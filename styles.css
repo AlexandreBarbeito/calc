@@ -1,0 +1,160 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.calculator {
+    width: 100%;
+    max-width: 400px;
+    background-color: #2c3e50;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.display {
+    background-color: #34495e;
+    padding: 20px;
+    text-align: right;
+    color: white;
+    position: relative;
+}
+
+.previous-operand {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    height: 24px;
+    overflow: hidden;
+}
+
+.current-operand {
+    font-size: 2.5rem;
+    margin-top: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-panel {
+    background-color: #34495e;
+    color: white;
+    padding: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    border-top: 1px solid #3d5166;
+}
+
+.history-panel h3 {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#history-content {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background-color: #3d5166;
+}
+
+button {
+    border: none;
+    outline: none;
+    padding: 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    background-color: #2c3e50;
+    color: white;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background-color: #3d5166;
+}
+
+button:active {
+    background-color: #4a627d;
+}
+
+.operator {
+    background-color: #3498db;
+}
+
+.operator:hover {
+    background-color: #2980b9;
+}
+
+.operator:active {
+    background-color: #1f6fb3;
+}
+
+.span-two {
+    grid-column: span 2;
+}
+
+.number {
+    background-color: #34495e;
+}
+
+.equals {
+    background-color: #2ecc71;
+}
+
+.equals:hover {
+    background-color: #27ae60;
+}
+
+.equals:active {
+    background-color: #219955;
+}
+
+#clear {
+    background-color: #e74c3c;
+}
+
+#clear:hover {
+    background-color: #c0392b;
+}
+
+#clear:active {
+    background-color: #a53125;
+}
+
+#delete {
+    background-color: #f39c12;
+}
+
+#delete:hover {
+    background-color: #d35400;
+}
+
+#delete:active {
+    background-color: #ba4a00;
+}
+
+@media (max-width: 500px) {
+    .calculator {
+        max-width: 100%;
+    }
+    
+    button {
+        padding: 15px;
+    }
+}
