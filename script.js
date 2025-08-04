@@ -1,119 +1,134 @@
-body {
-    background: linear-gradient(135deg, #232526 0%, #414345 100%);
-    font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+const display = document.getElementById('display');
+const buttons = document.querySelectorAll('.btn');
+const historyList = document.getElementById('history-list');
+
+let currentInput = '';
+let resultShown = false;
+let history = [];
+
+// Atualiza o display
+function updateDisplay() {
+    display.textContent = currentInput || '0';
 }
 
-.calculator-container {
-    display: flex;
-    gap: 40px;
-    background: rgba(255,255,255,0.05);
-    padding: 40px 30px;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+// Adiciona ao histórico
+function addToHistory(expression, result) {
+    history.unshift(`${expression} = ${result}`);
+    if (history.length > 15) history.pop();
+    renderHistory();
 }
 
-.calculator {
-    background: #2b2c2e;
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    padding: 20px;
-    width: 320px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+function renderHistory() {
+    historyList.innerHTML = '';
+    history.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        historyList.appendChild(li);
+    });
 }
 
-.display {
-    background: #1e1f21;
-    color: #fff;
-    font-size: 2.4rem;
-    text-align: right;
-    padding: 18px 16px;
-    border-radius: 10px;
-    min-height: 48px;
-    overflow-x: auto;
-    word-break: break-all;
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-}
-
-.buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 60px);
-    gap: 12px;
-}
-
-.btn {
-    background: #3b3c3f;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.3rem;
-    padding: 18px 0;
-    cursor: pointer;
-    transition: background 0.2s;
-    outline: none;
-}
-
-.btn:hover, .btn:focus {
-    background: #5c5e62;
-}
-
-.equal {
-    background: #ffb347;
-    color: #222;
-    grid-row: span 2;
-    font-weight: bold;
-}
-
-.zero {
-    grid-column: span 2;
-}
-
-.history {
-    width: 220px;
-    background: #232526;
-    border-radius: 14px;
-    padding: 18px 14px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-}
-
-.history h2 {
-    color: #fff;
-    font-size: 1.2rem;
-    margin-top: 0;
-    margin-bottom: 12px;
-    letter-spacing: 1px;
-}
-
-#history-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 320px;
-    overflow-y: auto;
-}
-
-#history-list li {
-    color: #cfcfcf;
-    padding: 6px 0;
-    border-bottom: 1px solid #353537;
-    font-size: 1rem;
-    word-break: break-all;
-}
-
-@media (max-width: 850px) {
-    .calculator-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
-    }
-    .history {
-        width: 100%;
+// Função para calcular o resultado
+function calculate() {
+    try {
+        // Substitui × e ÷ por * e / para eval
+        let expression = currentInput.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+        // Remove operadores no final
+        expression = expression.replace(/[\+\-\*\/\.]$/, '');
+        const result = eval(expression);
+        if (result !== undefined) {
+            addToHistory(currentInput, result);
+            currentInput = result.toString();
+            resultShown = true;
+            updateDisplay();
+        }
+    } catch (e) {
+        display.textContent = 'Erro';
+        currentInput = '';
+        resultShown = true;
     }
 }
+
+// Lida com o clique dos botões
+buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const action = btn.getAttribute('data-action');
+        handleInput(action);
+    });
+});
+
+// Lida com entrada pelo teclado
+document.addEventListener('keydown', (e) => {
+    let key = e.key;
+    if (key === 'Enter') key = '=';
+    if (key === 'Backspace') key = 'backspace';
+    if (key === 'Escape') key = 'clear';
+    if (['+', '-', '*', '/', '.', '=', 'clear', 'backspace'].includes(key) || (!isNaN(key) && key !== ' ')) {
+        e.preventDefault();
+        handleInput(key);
+    }
+});
+
+function handleInput(input) {
+    if (resultShown && !isOperator(input) && input !== '=' && input !== 'backspace' && input !== 'clear') {
+        // Se resultado foi mostrado e o usuário digita um número, começa novo cálculo
+        currentInput = '';
+        resultShown = false;
+    }
+
+    switch(input) {
+        case 'clear':
+            currentInput = '';
+            updateDisplay();
+            break;
+        case 'backspace':
+            currentInput = currentInput.slice(0, -1);
+            updateDisplay();
+            break;
+        case '=':
+            calculate();
+            break;
+        case '+': case '-': case '*': case '/': case '×': case '÷': case '−':
+            if (currentInput === '' && (input === '-' || input === '−')) {
+                currentInput = '-';
+            } else if (currentInput && !isOperator(lastChar(currentInput))) {
+                currentInput += input.replace('×','*').replace('÷','/').replace('−','-');
+            } else if (currentInput && isOperator(lastChar(currentInput))) {
+                // Substitui o último operador
+                currentInput = currentInput.slice(0, -1) + input.replace('×','*').replace('÷','/').replace('−','-');
+            }
+            updateDisplay();
+            break;
+        case '.':
+            // Não permite dois pontos seguidos ou dois pontos no mesmo número
+            if (canAddDot()) {
+                currentInput += '.';
+                updateDisplay();
+            }
+            break;
+        default:
+            // Números
+            if (!isNaN(input)) {
+                currentInput += input;
+                updateDisplay();
+            }
+    }
+}
+
+function isOperator(char) {
+    return ['+', '-', '*', '/', '×', '÷', '−'].includes(char);
+}
+
+function lastChar(str) {
+    return str[str.length - 1];
+}
+
+function canAddDot() {
+    // Não permite dois pontos seguidos ou dois pontos no mesmo número
+    const parts = currentInput.split(/[\+\-\*\/]/);
+    const lastNumber = parts[parts.length - 1];
+    return !lastNumber.includes('.');
+}
+
+// Inicialização
+updateDisplay();
+renderHistory();
